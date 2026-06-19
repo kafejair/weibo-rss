@@ -125,8 +125,9 @@ export const statusToHTML = (status: WeiboStatus) => {
   if (status.pics) {
     status.pics.forEach(function (item) {
       tempHTML += "<br><br>";
-      const url = config.imageCache ? (config.imageCache + encodeURIComponent(item.large.url)) : item.large.url;
-      const largeUrl = config.imageCache ? (config.imageCache + encodeURIComponent(item.large.url)) : item.large.url;
+      const url = 'https://i0.wp.com/' + item.large.url.replace('https://', '').replace('http://', '');
+const largeUrl = url;
+
       tempHTML += '<a href="' + largeUrl + '" target="_blank"><img src="' + url+ '"></a>';
     });
   }
