@@ -121,15 +121,21 @@ export const statusToHTML = (status: WeiboStatus) => {
     }
   }
 
-  // 微博配图
+    // 微博配图
   if (status.pics) {
-    status.pics.forEach(function (item) {
-      tempHTML += "<br><br>";
+    let picsHTML = "";
+    status.pics.forEach(function (item, index) {
       const url = 'https://i0.wp.com/' + item.large.url.replace('https://', '').replace('http://', '');
-const largeUrl = url;
-
-      tempHTML += '<a href="' + largeUrl + '" target="_blank"><img src="' + url+ '"></a>';
+      const imgTag = '<br><br><a href="' + url + '" target="_blank"><img src="' + url + '"></a>';
+      
+      // 如果是第一张图，我们把它存在一个变量里，稍后放到最前面
+      if (index === 0) {
+        tempHTML = imgTag + "<br>" + tempHTML;
+      } else {
+        picsHTML += imgTag;
+      }
     });
+    tempHTML += picsHTML;});
   }
 
   return tempHTML;
