@@ -32,7 +32,7 @@ const defaultConfig = {
     apiDomain: 7 * 24 * 60 * 60,
   },
   // 图片缓存代理
-  imageCache: process.env.WEIBO_IMAGE_PROXY || 'https://image.baidu.com/search/down?url=',
+  imageCache: 'https://wsrv.nl/?url=',
 };
 
 /**
