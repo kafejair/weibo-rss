@@ -32,7 +32,7 @@ const defaultConfig = {
     apiDomain: 7 * 24 * 60 * 60,
   },
   // 图片缓存代理
-  imageCache: 'https://wsrv.nl/?url=',
+  imageCache: 'https://i0.wp.com/',
 };
 
 /**
