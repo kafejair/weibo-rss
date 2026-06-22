@@ -62,12 +62,22 @@ export const registerRoutes = (
       const xmlData = await ctx.cache.memo(async () => {
         const weiboData = await ctx.weibo.fetchUserLatestWeibo(uid);
         if (weiboData) {
+          const host = ctx.host;
+          const protocol = ctx.protocol;
+          
+          // 處理博主頭像代理，解決防盜鏈問題
+          let avatarUrl = weiboData.avatarUrl;
+          if (avatarUrl) {
+            avatarUrl = `${protocol}://${host}/proxy/image?url=${encodeURIComponent(avatarUrl)}`;
+          }
+
           // basic info
           const feed = new NodeRSS({
             site_url: "https://weibo.com/" + uid,
             feed_url: '',
             title: weiboData.screenName + '的微博',
             description: weiboData.description,
+            image_url: avatarUrl || 'https://weibo.com/favicon.ico',
             generator: 'https://github.com/zgq354/weibo-rss',
             ttl: config.rssTTL,
             custom_namespaces: {

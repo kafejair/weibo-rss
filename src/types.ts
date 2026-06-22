@@ -77,5 +77,6 @@ export interface WeiboUserData {
   screenName: string,
   description: string,
   containerId?: string,
+  avatarUrl?: string,
   statusList?: WeiboStatus[],
 }

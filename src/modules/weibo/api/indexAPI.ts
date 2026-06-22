@@ -56,6 +56,7 @@ export const createIndexAPI = () => {
           screenName: data.data.userInfo.screen_name,
           description: data.data.userInfo.description,
           containerId: data.data.tabsInfo.tabs[1].containerid,
+          avatarUrl: data.data.userInfo.avatar_hd,
         };
         return result;
       }).catch(err => handleForbiddenErr(err, disable));
