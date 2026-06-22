@@ -113,40 +113,31 @@ export const getFirstImageUrl = (status: WeiboStatus): string | null => {
 };
 
 export const statusToHTML = (status: WeiboStatus, includeImages: boolean = true) => {
-  let tempHTML = status.text;
+  let textHTML = status.text;
   // 表情转文字
-  tempHTML = tempHTML.replace(/<span class="url-icon"><img alt="?(.*?)"? src=".*?" style="width:1em; height:1em;".*?\/><\/span>/g, '$1');
+  textHTML = textHTML.replace(/<span class="url-icon"><img alt="?(.*?)"? src=".*?" style="width:1em; height:1em;".*?\/><\/span>/g, '$1');
   // 去掉外链图标
-  tempHTML = tempHTML.replace(/<span class='url-icon'><img.*?><\/span>/g, '');
+  textHTML = textHTML.replace(/<span class='url-icon'><img.*?><\/span>/g, '');
 
   // 转发的微博
   if (status.retweeted_status) {
-    tempHTML += "<br><br>";
+    textHTML += "<br><br>";
     // 可能有转发的微博被删除的情况
     if (status.retweeted_status.user) {
-      tempHTML += '<div style="border-left: 3px solid gray; padding-left: 1em;">' +
+      textHTML += '<div style="border-left: 3px solid gray; padding-left: 1em;">' +
         '转发 <a href="https://weibo.com/' + status.retweeted_status.user.id + '" target="_blank">@' + status.retweeted_status.user.screen_name + '</a>: ' +
         statusToHTML(status.retweeted_status, includeImages) +
         '</div>';
     }
   }
 
-  // 微博配图
-  if (includeImages && status.pics) {
-    let picsHTML = "";
-    status.pics.forEach(function (item, index) {
-      const url = 'https://i0.wp.com/' + item.large.url.replace('https://', '').replace('http://', '');
-      const imgTag = '<br><br><img src="' + url + '">';
-      
-      // 如果是第一张图，把它放到最前面
-      if (index === 0) {
-        tempHTML = imgTag + "<br>" + tempHTML;
-      } else {
-        picsHTML += imgTag;
-      }
-    });
-    tempHTML += picsHTML;
+  if (includeImages) {
+    const imageUrl = getFirstImageUrl(status);
+    if (imageUrl) {
+      // 模仿 rss.app 的結構：一個外層 div，裡面先放 img (100% 寬度)，然後放文字內容
+      return `<div><img src="${imageUrl}" style="width: 100%;" /><div>${textHTML}</div></div>`;
+    }
   }
 
-  return tempHTML;
+  return textHTML;
 };
