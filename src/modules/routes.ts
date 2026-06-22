@@ -73,7 +73,8 @@ export const registerRoutes = (
 
           // basic info
           const feed = new NodeRSS({
-            site_url: "https://weibo.com/" + uid,
+            // 將 site_url 改為博主的頭像代理網址或中性網址，避免 Launcher 強制抓取 weibo.com 的 favicon
+            site_url: avatarUrl || ("https://weibo.com/" + uid),
             feed_url: '',
             title: weiboData.screenName + '的微博',
             description: weiboData.description,
