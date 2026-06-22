@@ -24,8 +24,8 @@ export class DomainInvalidError extends Error {
 export const registerRoutes = (
   router: Router<RSSKoaState, RSSKoaContext>
 ) => {
-  router.get('/rss/user/:id', async (ctx) => {
-    const uid = ctx.params['id'];
+  router.get(['/rss/user/:id', '/rss/user/:id.xml'], async (ctx) => {
+    const uid = ctx.params['id'].replace('.xml', '');
     try {
       // check uid format
       if (!/^[0-9]{10}$/.test(uid)) {
@@ -64,7 +64,7 @@ export const registerRoutes = (
               title: status.status_title || (status.text ? status.text.replace(/<[^>]+>/g, '').replace(/[\n]/g, '').substr(0, 25) : null),
               description: statusToHTML(status, true),
               url: 'https://weibo.com/' + uid + '/' + status.bid,
-              guid: status.bid, // 使用更短的 GUID
+              guid: { _attr: { isPermaLink: 'false' }, cdata: status.bid },
               author: weiboData.screenName,
               date: new Date(status.created_at),
               custom_elements
