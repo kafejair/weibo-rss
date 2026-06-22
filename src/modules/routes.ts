@@ -47,7 +47,8 @@ export const registerRoutes = (
             ttl: config.rssTTL,
             custom_namespaces: {
               'media': 'http://search.yahoo.com/mrss/',
-              'dc': 'http://purl.org/dc/elements/1.1/'
+              'dc': 'http://purl.org/dc/elements/1.1/',
+              'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'
             }
           });
           // item
@@ -55,17 +56,24 @@ export const registerRoutes = (
             if (!status) return;
             const imageUrl = getFirstImageUrl(status);
             const custom_elements: any[] = [];
+            let enclosure: any = undefined;
+
             if (imageUrl) {
-              custom_elements.push({ 'enclosure': { _attr: { url: imageUrl, length: '0', type: 'image/jpeg' } } });
+              // 某些解析器拒絕 length="0"，設置為 100KB 的預估值
+              enclosure = { url: imageUrl, length: 102400, type: 'image/jpeg' };
+              
               custom_elements.push({ 'media:thumbnail': { _attr: { url: imageUrl } } });
               custom_elements.push({ 'media:content': { _attr: { url: imageUrl, medium: 'image', type: 'image/jpeg' } } });
+              // 額外增加 itunes:image，部分 Android 組件會參考
+              custom_elements.push({ 'itunes:image': { _attr: { href: imageUrl } } });
             }
 
             feed.item({
               title: status.status_title || (status.text ? status.text.replace(/<[^>]+>/g, '').replace(/[\n]/g, '').substr(0, 25) : null),
-              description: statusToHTML(status, false), // 為了讓 Widget 抓取結構化圖片，我們在 description 中不重複放圖片
+              description: statusToHTML(status, true), // 將圖片放回 description，但確保 enclosure 同時存在
               url: 'https://weibo.com/' + uid + '/' + status.bid,
               date: new Date(status.created_at),
+              enclosure,
               custom_elements
             });
           });
