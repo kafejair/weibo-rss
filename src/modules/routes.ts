@@ -45,21 +45,12 @@ export const registerRoutes = (
             description: weiboData.description,
             generator: 'https://github.com/zgq354/weibo-rss',
             ttl: config.rssTTL,
-            custom_namespaces: {
-              'media': 'http://search.yahoo.com/mrss/',
-              'dc': 'http://purl.org/dc/elements/1.1/',
-              'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'
-            }
           });
           // item
           weiboData.statusList?.forEach((status) => {
             if (!status) return;
             const imageUrl = getFirstImageUrl(status);
-            const custom_elements: any[] = [];
-            if (imageUrl) {
-              custom_elements.push({ 'media:content': { _attr: { url: imageUrl, medium: 'image' } } });
-            }
-
+            
             feed.item({
               title: status.status_title || (status.text ? status.text.replace(/<[^>]+>/g, '').replace(/[\n]/g, '').substr(0, 25) : null),
               description: statusToHTML(status, true),
@@ -67,7 +58,7 @@ export const registerRoutes = (
               guid: status.bid,
               author: weiboData.screenName,
               date: new Date(status.created_at),
-              custom_elements
+              enclosure: imageUrl ? { url: imageUrl, length: 102400, type: 'image/jpeg' } : undefined,
             });
           });
           cacheMiss = true;

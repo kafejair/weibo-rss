@@ -103,17 +103,11 @@ export class WeiboData {
 }
 
 export const getFirstImageUrl = (status: WeiboStatus): string | null => {
-  let rawUrl: string | null = null;
   if (status.pics && status.pics.length > 0) {
-    // 使用 bmiddle (mw690) 而不是 large (mw2000)，體積更小，兼容性更好
-    rawUrl = status.pics[0].large.url.replace('/large/', '/mw690/');
-  } else if (status.retweeted_status) {
-    return getFirstImageUrl(status.retweeted_status);
+    return 'https://i0.wp.com/' + status.pics[0].large.url.replace('https://', '').replace('http://', '');
   }
-
-  if (rawUrl) {
-    // 使用 wsrv.nl 代理，並強制輸出為 jpg，這比 i0.wp.com 更穩定且兼容性更強
-    return `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&output=jpg&q=75`;
+  if (status.retweeted_status) {
+    return getFirstImageUrl(status.retweeted_status);
   }
   return null;
 };
