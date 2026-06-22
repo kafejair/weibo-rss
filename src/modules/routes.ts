@@ -82,11 +82,14 @@ export const registerRoutes = (
             ttl: config.rssTTL,
             custom_namespaces: {
               'media': 'http://search.yahoo.com/mrss/',
-              'dc': 'http://purl.org/dc/elements/1.1/'
+              'dc': 'http://purl.org/dc/elements/1.1/',
+              'webfeeds': 'http://webfeeds.org/rss/1.0'
             },
             custom_elements: [
               { 'icon': avatarUrl || 'https://weibo.com/favicon.ico' },
-              { 'logo': avatarUrl || 'https://weibo.com/favicon.ico' }
+              { 'logo': avatarUrl || 'https://weibo.com/favicon.ico' },
+              { 'webfeeds:icon': avatarUrl || 'https://weibo.com/favicon.ico' },
+              { 'webfeeds:accentColor': 'FF8200' }
             ]
           });
           // item
