@@ -63,7 +63,7 @@ export const registerRoutes = (
 
             feed.item({
               title: status.status_title || (status.text ? status.text.replace(/<[^>]+>/g, '').replace(/[\n]/g, '').substr(0, 25) : null),
-              description: statusToHTML(status),
+              description: statusToHTML(status, false), // 為了讓 Widget 抓取結構化圖片，我們在 description 中不重複放圖片
               url: 'https://weibo.com/' + uid + '/' + status.bid,
               date: new Date(status.created_at),
               custom_elements

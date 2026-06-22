@@ -112,7 +112,7 @@ export const getFirstImageUrl = (status: WeiboStatus): string | null => {
   return null;
 };
 
-export const statusToHTML = (status: WeiboStatus) => {
+export const statusToHTML = (status: WeiboStatus, includeImages: boolean = true) => {
   let tempHTML = status.text;
   // 表情转文字
   tempHTML = tempHTML.replace(/<span class="url-icon"><img alt="?(.*?)"? src=".*?" style="width:1em; height:1em;".*?\/><\/span>/g, '$1');
@@ -126,13 +126,13 @@ export const statusToHTML = (status: WeiboStatus) => {
     if (status.retweeted_status.user) {
       tempHTML += '<div style="border-left: 3px solid gray; padding-left: 1em;">' +
         '转发 <a href="https://weibo.com/' + status.retweeted_status.user.id + '" target="_blank">@' + status.retweeted_status.user.screen_name + '</a>: ' +
-        statusToHTML(status.retweeted_status) +
+        statusToHTML(status.retweeted_status, includeImages) +
         '</div>';
     }
   }
 
   // 微博配图
-  if (status.pics) {
+  if (includeImages && status.pics) {
     let picsHTML = "";
     status.pics.forEach(function (item, index) {
       const url = 'https://i0.wp.com/' + item.large.url.replace('https://', '').replace('http://', '');
