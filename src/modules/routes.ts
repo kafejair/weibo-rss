@@ -64,7 +64,7 @@ export const registerRoutes = (
               title: status.status_title || (status.text ? status.text.replace(/<[^>]+>/g, '').replace(/[\n]/g, '').substr(0, 25) : null),
               description: statusToHTML(status, true),
               url: 'https://weibo.com/' + uid + '/' + status.bid,
-              guid: { _attr: { isPermaLink: 'false' }, cdata: status.bid },
+              guid: status.bid,
               author: weiboData.screenName,
               date: new Date(status.created_at),
               custom_elements
