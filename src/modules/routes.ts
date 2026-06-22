@@ -83,7 +83,11 @@ export const registerRoutes = (
             custom_namespaces: {
               'media': 'http://search.yahoo.com/mrss/',
               'dc': 'http://purl.org/dc/elements/1.1/'
-            }
+            },
+            custom_elements: [
+              { 'icon': avatarUrl || 'https://weibo.com/favicon.ico' },
+              { 'logo': avatarUrl || 'https://weibo.com/favicon.ico' }
+            ]
           });
           // item
           weiboData.statusList?.forEach((status) => {
