@@ -5,7 +5,7 @@ import Router from '@koa/router';
 import NodeRSS from 'rss';
 import { RSSKoaContext, RSSKoaState } from '../types';
 import config from '../config';
-import { DomainNotFoundError, statusToHTML, UserNotFoundError } from './weibo/weibo';
+import { DomainNotFoundError, getFirstImageUrl, statusToHTML, UserNotFoundError } from './weibo/weibo';
 import { ThrottledError } from './throttler';
 import { logger } from './logger';
 
@@ -45,15 +45,28 @@ export const registerRoutes = (
             description: weiboData.description,
             generator: 'https://github.com/zgq354/weibo-rss',
             ttl: config.rssTTL,
+            custom_namespaces: {
+              'media': 'http://search.yahoo.com/mrss/',
+              'dc': 'http://purl.org/dc/elements/1.1/'
+            }
           });
           // item
           weiboData.statusList?.forEach((status) => {
             if (!status) return;
+            const imageUrl = getFirstImageUrl(status);
+            const custom_elements: any[] = [];
+            if (imageUrl) {
+              custom_elements.push({ 'enclosure': { _attr: { url: imageUrl, length: '0', type: 'image/jpeg' } } });
+              custom_elements.push({ 'media:thumbnail': { _attr: { url: imageUrl } } });
+              custom_elements.push({ 'media:content': { _attr: { url: imageUrl, medium: 'image', type: 'image/jpeg' } } });
+            }
+
             feed.item({
               title: status.status_title || (status.text ? status.text.replace(/<[^>]+>/g, '').replace(/[\n]/g, '').substr(0, 25) : null),
               description: statusToHTML(status),
               url: 'https://weibo.com/' + uid + '/' + status.bid,
               date: new Date(status.created_at),
+              custom_elements
             });
           });
           cacheMiss = true;

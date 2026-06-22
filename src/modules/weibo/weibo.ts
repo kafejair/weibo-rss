@@ -102,6 +102,16 @@ export class WeiboData {
   fetchUIDByDomain = async (domain: string) => this.getUIDByDomain(domain);
 }
 
+export const getFirstImageUrl = (status: WeiboStatus): string | null => {
+  if (status.pics && status.pics.length > 0) {
+    return 'https://i0.wp.com/' + status.pics[0].large.url.replace('https://', '').replace('http://', '');
+  }
+  if (status.retweeted_status) {
+    return getFirstImageUrl(status.retweeted_status);
+  }
+  return null;
+};
+
 export const statusToHTML = (status: WeiboStatus) => {
   let tempHTML = status.text;
   // 表情转文字
@@ -121,12 +131,12 @@ export const statusToHTML = (status: WeiboStatus) => {
     }
   }
 
-      // 微博配图
+  // 微博配图
   if (status.pics) {
     let picsHTML = "";
     status.pics.forEach(function (item, index) {
       const url = 'https://i0.wp.com/' + item.large.url.replace('https://', '').replace('http://', '');
-      const imgTag = '<br><br><a href="' + url + '" target="_blank"><img src="' + url + '"></a>';
+      const imgTag = '<br><br><img src="' + url + '">';
       
       // 如果是第一张图，把它放到最前面
       if (index === 0) {
@@ -139,4 +149,4 @@ export const statusToHTML = (status: WeiboStatus) => {
   }
 
   return tempHTML;
-}
+};
