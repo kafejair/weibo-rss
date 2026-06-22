@@ -58,7 +58,7 @@ export const registerRoutes = (
               guid: status.bid,
               author: weiboData.screenName,
               date: new Date(status.created_at),
-              enclosure: imageUrl ? { url: imageUrl, length: 102400, type: 'image/jpeg' } : undefined,
+              enclosure: imageUrl ? { url: imageUrl, size: 102400, type: 'image/jpeg' } : undefined,
             });
           });
           cacheMiss = true;
