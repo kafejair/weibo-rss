@@ -45,20 +45,30 @@ export const registerRoutes = (
             description: weiboData.description,
             generator: 'https://github.com/zgq354/weibo-rss',
             ttl: config.rssTTL,
+            custom_namespaces: {
+              'media': 'http://search.yahoo.com/mrss/',
+              'dc': 'http://purl.org/dc/elements/1.1/'
+            }
           });
           // item
           weiboData.statusList?.forEach((status) => {
             if (!status) return;
             const imageUrl = getFirstImageUrl(status);
+            const custom_elements: any[] = [];
             
+            if (imageUrl) {
+              custom_elements.push({ 'media:content': { _attr: { url: imageUrl, medium: 'image' } } });
+            }
+            custom_elements.push({ 'dc:creator': { _cdata: weiboData.screenName } });
+            // 將 guid 放入 custom_elements 以繞過類型限制，並精確控制屬性
+            custom_elements.push({ 'guid': { _attr: { isPermaLink: 'false' }, _cdata: status.bid } });
+
             feed.item({
               title: status.status_title || (status.text ? status.text.replace(/<[^>]+>/g, '').replace(/[\n]/g, '').substr(0, 25) : null),
               description: statusToHTML(status, true),
               url: 'https://weibo.com/' + uid + '/' + status.bid,
-              guid: status.bid,
-              author: weiboData.screenName,
               date: new Date(status.created_at),
-              enclosure: imageUrl ? { url: imageUrl, size: 102400, type: 'image/jpeg' } : undefined,
+              custom_elements
             });
           });
           cacheMiss = true;
