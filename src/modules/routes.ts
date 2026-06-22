@@ -3,6 +3,7 @@
  */
 import Router from '@koa/router';
 import NodeRSS from 'rss';
+import axios from 'axios';
 import { RSSKoaContext, RSSKoaState } from '../types';
 import config from '../config';
 import { DomainNotFoundError, getFirstImageUrl, statusToHTML, UserNotFoundError } from './weibo/weibo';
@@ -24,6 +25,30 @@ export class DomainInvalidError extends Error {
 export const registerRoutes = (
   router: Router<RSSKoaState, RSSKoaContext>
 ) => {
+  // 圖片代理路由，解決防盜鏈並統一域名
+  router.get('/proxy/image', async (ctx) => {
+    const url = ctx.query['url'] as string;
+    if (!url || (!url.startsWith('http://') && !url.startsWith('https://'))) {
+      ctx.status = 400;
+      return;
+    }
+    try {
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer',
+        headers: {
+          'Referer': 'https://weibo.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+      ctx.set('Content-Type', response.headers['content-type'] || 'image/jpeg');
+      ctx.set('Cache-Control', 'public, max-age=31536000'); // 緩存一年
+      ctx.body = response.data;
+    } catch (error) {
+      ctx.status = 500;
+      logger.error(`Proxy image failed: ${url}`, error);
+    }
+  });
+
   router.get(['/rss/user/:id', '/rss/user/:id.xml'], async (ctx) => {
     const uid = ctx.params['id'].replace('.xml', '');
     try {
@@ -53,9 +78,20 @@ export const registerRoutes = (
           // item
           weiboData.statusList?.forEach((status) => {
             if (!status) return;
-            const imageUrl = getFirstImageUrl(status);
-            const custom_elements: any[] = [];
+            let imageUrl = getFirstImageUrl(status);
+            // 將圖片 URL 轉換為本地代理 URL
+            if (imageUrl) {
+              // 從 status 中獲取原始微博 URL
+              const rawWeiboUrl = status.pics?.[0]?.large?.url || status.retweeted_status?.pics?.[0]?.large?.url;
+              if (rawWeiboUrl) {
+                const host = ctx.host;
+                const protocol = ctx.protocol;
+                // 使用當前服務器的代理路由
+                imageUrl = `${protocol}://${host}/proxy/image?url=${encodeURIComponent(rawWeiboUrl)}`;
+              }
+            }
             
+            const custom_elements: any[] = [];
             if (imageUrl) {
               custom_elements.push({ 'media:content': { _attr: { url: imageUrl, medium: 'image' } } });
             }

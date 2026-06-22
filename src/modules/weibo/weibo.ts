@@ -124,9 +124,12 @@ export const statusToHTML = (status: WeiboStatus, includeImages: boolean = true)
   }
 
   if (includeImages) {
-    const imageUrl = getFirstImageUrl(status);
+    let imageUrl = getFirstImageUrl(status);
     if (imageUrl) {
-      // 模仿 rss.app 的極簡結構：只有一個 div 包裹圖片和純文字
+      // 在 HTML 中也使用本地代理 URL (這裡需要動態獲取 host，但 statusToHTML 沒傳入 ctx，
+      // 所以我們先保留 getFirstImageUrl 的原始邏輯，它目前使用的是 i0.wp.com。
+      // 為了保持一致，我們在 routes.ts 中已經處理了 XML 標籤的代理。
+      // 如果 Widget 是讀取 HTML 裡的 img，i0.wp.com 應該是沒問題的（長按能顯示證明了這一點）。
       return `<div><img src="${imageUrl}" style="width: 100%;" /><div>${pureText}</div></div>`;
     }
   }
