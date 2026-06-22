@@ -113,31 +113,23 @@ export const getFirstImageUrl = (status: WeiboStatus): string | null => {
 };
 
 export const statusToHTML = (status: WeiboStatus, includeImages: boolean = true) => {
-  let textHTML = status.text;
-  // 表情转文字
-  textHTML = textHTML.replace(/<span class="url-icon"><img alt="?(.*?)"? src=".*?" style="width:1em; height:1em;".*?\/><\/span>/g, '$1');
-  // 去掉外链图标
-  textHTML = textHTML.replace(/<span class='url-icon'><img.*?><\/span>/g, '');
-
-  // 转发的微博
+  // 提取純文字內容，移除所有 HTML 標籤，避免干擾 Widget 解析器
+  let pureText = status.text.replace(/<[^>]+>/g, '');
+  
+  // 轉發的微博也只取文字
   if (status.retweeted_status) {
-    textHTML += "<br><br>";
-    // 可能有转发的微博被删除的情况
-    if (status.retweeted_status.user) {
-      textHTML += '<div style="border-left: 3px solid gray; padding-left: 1em;">' +
-        '转发 <a href="https://weibo.com/' + status.retweeted_status.user.id + '" target="_blank">@' + status.retweeted_status.user.screen_name + '</a>: ' +
-        statusToHTML(status.retweeted_status, includeImages) +
-        '</div>';
-    }
+    const retweetText = status.retweeted_status.text.replace(/<[^>]+>/g, '');
+    const retweetUser = status.retweeted_status.user?.screen_name || '未知用戶';
+    pureText += ` // 轉發 @${retweetUser}: ${retweetText}`;
   }
 
   if (includeImages) {
     const imageUrl = getFirstImageUrl(status);
     if (imageUrl) {
-      // 模仿 rss.app 的結構：一個外層 div，裡面先放 img (100% 寬度)，然後放文字內容
-      return `<div><img src="${imageUrl}" style="width: 100%;" /><div>${textHTML}</div></div>`;
+      // 模仿 rss.app 的極簡結構：只有一個 div 包裹圖片和純文字
+      return `<div><img src="${imageUrl}" style="width: 100%;" /><div>${pureText}</div></div>`;
     }
   }
 
-  return textHTML;
+  return pureText;
 };
