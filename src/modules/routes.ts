@@ -40,7 +40,7 @@ export const registerRoutes = (
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
       });
-      ctx.set('Content-Type', response.headers['content-type'] || 'image/jpeg');
+      ctx.set('Content-Type', (response.headers['content-type'] as string) || 'image/jpeg');
       ctx.set('Cache-Control', 'public, max-age=31536000'); // 緩存一年
       ctx.body = response.data;
     } catch (error) {
